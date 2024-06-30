@@ -1,5 +1,15 @@
 local ts_parsers = require "nvim-treesitter.parsers"
 
+-- default post-processing: trim spaces, new lines, trailing braces
+local transform_line = function(line)
+  local line = line:gsub("%s*[%[%(%{]*%s*$", ""):gsub("%s+", " ")
+  -- contract parameters list if it gets too long
+  if string.len(line) > 70 then
+    line = line:gsub("%([^%)]+%)", "(...)")
+  end
+  return line
+end
+
 local function is_statusline_scope(node, type_patterns)
   if not node then
     return false
@@ -12,11 +22,6 @@ local function is_statusline_scope(node, type_patterns)
     end
   end
   return false
-end
-
--- default post-processing: trim spaces, new lines, trailing braces
-local transform_line = function(line)
-  return line:gsub("%s*[%[%(%{]*%s*$", ""):gsub("%s+", " ")
 end
 
 function statusline(opts)
